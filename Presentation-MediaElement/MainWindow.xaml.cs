@@ -42,7 +42,7 @@ namespace Presentation_MediaElement
 
         private void SynchronisePositions()
         {
-            //this.MediaPlayer.Position = PWindow.GetTime();
+            this.MediaPlayer.Position = PWindow.GetTime();
         }
 
         private void PlayButton_Click(object sender, RoutedEventArgs e)
