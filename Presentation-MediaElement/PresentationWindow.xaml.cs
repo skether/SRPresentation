@@ -42,16 +42,6 @@ namespace Presentation_MediaElement
             this.Presenter.Stop();
         }
 
-        internal void NextChapter()
-        {
-            //this.Presenter.MediaPlayer.Chapter.Next();
-        }
-
-        internal void PreviousChapter()
-        {
-            //this.Presenter.MediaPlayer.Chapter.Previous();
-        }
-
         public void SetTime(TimeSpan time)
         {
             this.Presenter.Position = time;

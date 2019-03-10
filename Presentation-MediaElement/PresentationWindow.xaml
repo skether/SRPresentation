@@ -8,6 +8,6 @@
         Title="PresentationWindow" Height="450" Width="800" Closing="Window_Closing"
         Background="Black">
     <Grid>
-        <MediaElement x:Name="Presenter" LoadedBehavior="Manual"/>
+        <MediaElement x:Name="Presenter" LoadedBehavior="Manual" Volume="1"/>
     </Grid>
 </Window>

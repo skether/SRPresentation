@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Xml.Linq;
 
 namespace Presentation_MediaElement
 {
@@ -32,7 +33,7 @@ namespace Presentation_MediaElement
             PWindow = new PresentationWindow();
             PWindow.Show();
 
-            Presentation = new Uri(@"E:\TestVideos\1 Minute Test.mkv");
+            //Presentation = new Uri(@"E:\TestVideos\1 Minute Test.mkv");
         }
 
         private void VideoPathTB_TextChanged(object sender, TextChangedEventArgs e)
@@ -65,16 +66,38 @@ namespace Presentation_MediaElement
             PWindow.Stop();
         }
 
+        private int GetCurrentChapter()
+        {
+            int c = 0;
+            int i = 0;
+            while (i < ChapterList.Items.Count && (ChapterList.Items[i] as Chapter).time <= this.MediaPlayer.Position)
+            {
+                c = i;
+                i++;
+            }
+            return c;
+        }
+
         private void NextChapterButton_Click(object sender, RoutedEventArgs e)
         {
-            //this.VLCPlayer.MediaPlayer.Chapter.Next();
-            PWindow.NextChapter();
+            int c = GetCurrentChapter() + 1;
+            if ( c< ChapterList.Items.Count)
+            {
+                Chapter chapter = ChapterList.Items[c] as Chapter;
+                this.MediaPlayer.Position = chapter.time;
+                PWindow.SetTime(chapter.time);
+            }
         }
 
         private void PreviousChapterButton_Click(object sender, RoutedEventArgs e)
-        {
-            //this.VLCPlayer.MediaPlayer.Chapter.Previous();
-            PWindow.PreviousChapter();
+        {;
+            int c = GetCurrentChapter() + -1;
+            if (c >= 0)
+            {
+                Chapter chapter = ChapterList.Items[c] as Chapter;
+                this.MediaPlayer.Position = chapter.time;
+                PWindow.SetTime(chapter.time);
+            }
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -109,43 +132,39 @@ namespace Presentation_MediaElement
 
         private void JumpToChapter_Click(object sender, RoutedEventArgs e)
         {
-            /*bool playing = false;
-            if (this.VLCPlayer.MediaPlayer.IsPlaying)
+            bool playing = false;
+            if (this.MediaPlayer.GetMediaState() == MediaState.Play)
             {
                 playing = true;
-                this.VLCPlayer.MediaPlayer.Pause();
+                this.MediaPlayer.Pause();
                 PWindow.Pause();
             }
 
-            if (this.ChapterList.SelectedIndex < 0) return;
-            int jumpCount = this.VLCPlayer.MediaPlayer.Chapter.Current - this.ChapterList.SelectedIndex;
-
-            bool forward = jumpCount < 0;
-            jumpCount = Math.Abs(jumpCount);
-
-            forward = true;
-            this.VLCPlayer.MediaPlayer.Time = 0;
-            PWindow.SetTime(0);
-            jumpCount = this.ChapterList.SelectedIndex;
-
-            for (int i = 0; i < jumpCount; i++) { if (forward) { this.VLCPlayer.MediaPlayer.Chapter.Next(); PWindow.NextChapter(); } else { this.VLCPlayer.MediaPlayer.Chapter.Previous(); PWindow.PreviousChapter(); } }
-
-            //PWindow.SetTime(this.VLCPlayer.MediaPlayer.Time);
+            if(this.ChapterList.SelectedItem != null)
+            {
+                this.MediaPlayer.Position = (this.ChapterList.SelectedItem as Chapter).time;
+                PWindow.SetTime((this.ChapterList.SelectedItem as Chapter).time);
+            }
 
             if (playing)
             {
-                this.VLCPlayer.MediaPlayer.Play();
+                this.MediaPlayer.Play();
                 PWindow.Play();
-            }*/
+            }
         }
 
         private void LoadChapter_Click(object sender, RoutedEventArgs e)
         {
-            /*this.ChapterList.Items.Clear();
-            for (int i = 0; i < this.VLCPlayer.MediaPlayer.Chapter.Count; i++)
+            XElement chaptersFromFile = XElement.Load(System.IO.Path.ChangeExtension(Presentation.ToString(), "xml"));
+            XElement editionEntry = chaptersFromFile.FirstNode as XElement;
+            XElement chapter = editionEntry.FirstNode.NextNode as XElement;
+
+            ChapterList.Items.Clear();
+
+            do
             {
-                this.ChapterList.Items.Add(i.ToString());
-            }*/
+                ChapterList.Items.Add(new Chapter(chapter));
+            } while ((chapter = chapter.NextNode as XElement) != null);
         }
 
         private void SyncButton_Click(object sender, RoutedEventArgs e)
